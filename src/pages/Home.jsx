@@ -54,18 +54,19 @@ export default function Home() {
 
       {rock && (
         <section id="rock" className="section">
-          <div className="section-head">
-            <h2>{rock.name}</h2>
-            <Link to={`/activity/${rock.code}`} className="route-price">
-              <b>{pesoShort(rock.price)}</b><span>per person</span><span className="go">See dates →</span>
-            </Link>
-          </div>
+          <h2>{rock.name}</h2>
           <RockActivities />
-          <p className="route-meta">
-            {rock.min_age ? `Ages ${rock.min_age} and up` : ''}
-            {rock.viewing_price != null ? ` · Viewing only ${pesoShort(rock.viewing_price)}` : ''}
-            {' · Safety gear and guide included'}
-          </p>
+          <div className="rock-book">
+            <div className="route-price">
+              <b>{pesoShort(rock.price)}</b><span>per person, all five activities</span>
+            </div>
+            <p className="route-meta">
+              {rock.min_age ? `Ages ${rock.min_age} and up` : ''}
+              {rock.viewing_price != null ? ` · Viewing only ${pesoShort(rock.viewing_price)}` : ''}
+              {' · Safety gear and guide included'}
+            </p>
+            <Link to={`/activity/${rock.code}`} className="btn-primary">See dates</Link>
+          </div>
         </section>
       )}
 
