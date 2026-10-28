@@ -12,7 +12,7 @@ export default function Help() {
         <dl className="facts">
           <dt>Facebook</dt><dd>{FACEBOOK_PAGE}</dd>
           <dt>Mobile</dt><dd>09XX XXX XXXX</dd>
-          <dt>Where</dt><dd>La Trinidad, Benguet</dd>
+          <dt>Where</dt><dd>Tagongtongao, Paoay, Atok, Benguet</dd>
         </dl>
       </div>
 
