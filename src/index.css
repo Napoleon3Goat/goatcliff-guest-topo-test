@@ -112,11 +112,15 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .section { margin-bottom: 40px; scroll-margin-top: 80px; }
 .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 14px; }
 .section-head h2 { margin: 0; }
-.route-meta { font-size: 0.9rem; font-weight: 600; color: var(--ink-2); margin: 12px 0 0; }
-.route-price { display: flex; flex-direction: column; align-items: flex-end; text-align: right; flex-shrink: 0; line-height: 1.1; color: var(--ink); text-decoration: none; }
+/* Price + book button under the rock photos, so the price sits with the action */
+.rock-book {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px 24px;
+  background: var(--paper); border: 1.5px solid var(--ink); border-radius: var(--radius); padding: 14px 18px;
+}
+.route-meta { font-size: 0.9rem; font-weight: 600; color: var(--ink-2); margin: 0; }
+.route-price { display: flex; flex-direction: column; line-height: 1.1; color: var(--ink); }
 .route-price b { font-family: var(--display); font-size: 2.6rem; }
 .route-price > span { font-size: 0.85rem; color: var(--ink-2); }
-.route-price .go { color: var(--rope-ink); font-weight: 700; margin-top: 6px; font-size: 0.95rem; }
 
 /* The five rock activities, each with its photo */
 .rock-list { list-style: none; margin: 0 0 16px; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
@@ -267,7 +271,7 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 }
 @media (max-width: 520px) {
   .section-head { align-items: flex-start; flex-direction: column; }
-  .route-price { align-items: flex-start; text-align: left; }
+  .rock-book { grid-template-columns: minmax(0, 1fr); }
   .rock-list { grid-template-columns: minmax(0, 1fr); gap: 0; }
   .rock-list li { display: grid; grid-template-columns: 72px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 14px; align-content: center; padding: 8px 0; border-top: 1px solid var(--line); }
   .rock-list img { grid-row: 1 / 3; width: 72px; aspect-ratio: 1; margin: 0; }
