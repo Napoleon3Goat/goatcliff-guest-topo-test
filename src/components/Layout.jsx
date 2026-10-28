@@ -13,6 +13,8 @@ export default function Layout() {
         <nav aria-label="Main">
           <NavLink to="/" end>Book</NavLink>
           <NavLink to="/help">Help</NavLink>
+          {/* Chatbot comes in January (2nd semester). For now the button does nothing. */}
+          <button type="button" className="nav-chat" title="Chatbot (coming soon)">Chatbot</button>
         </nav>
       </header>
 
@@ -21,7 +23,7 @@ export default function Layout() {
       </main>
 
       <footer className="site-footer">
-        <p><strong>Goatcliff Adventure and Camping</strong> · La Trinidad, Benguet</p>
+        <p><strong>Goatcliff Adventure and Camping</strong> · Tagongtongao, Paoay, Atok, Benguet</p>
         <p>Questions? Message us on our Facebook Page.</p>
       </footer>
     </div>
