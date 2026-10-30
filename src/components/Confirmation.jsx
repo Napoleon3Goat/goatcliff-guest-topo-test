@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getActivities } from '../lib/api'
 import { addDays, formatDate, peso } from '../lib/dates'
-import { isCamping } from '../lib/pricing'
+import { isCamping, isRock, TENTS } from '../lib/pricing'
 
 // The receipt shown after the down payment goes through.
 export default function Confirmation({ booking, activity, form, payment }) {
@@ -13,7 +13,7 @@ export default function Confirmation({ booking, activity, form, payment }) {
   useEffect(() => {
     if (!camping) return
     getActivities()
-      .then((list) => setRock(list.find((a) => !isCamping(a)) || null))
+      .then((list) => setRock(list.find(isRock) || null))
       .catch(() => setRock(null)) // the offer is optional; hide it if loading fails
   }, [camping])
 
@@ -29,8 +29,11 @@ export default function Confirmation({ booking, activity, form, payment }) {
 
       <dl className="facts left">
         <dt>Activity</dt><dd>{camping ? `Camping area ${activity.code}` : activity.name}</dd>
-        <dt>{camping ? 'Check-in' : 'Date'}</dt><dd>{formatDate(booking.visit_date)}</dd>
-        {camping && <><dt>Check-out</dt><dd>{formatDate(checkout)} ({booking.nights} night{booking.nights > 1 ? 's' : ''})</dd></>}
+        <dt>{camping ? 'Check-in' : 'Date'}</dt><dd>{formatDate(booking.visit_date)}{camping ? ', 1:00–6:00 PM' : ''}</dd>
+        {camping && <><dt>Check-out</dt><dd>{formatDate(checkout)}, 12:00 noon ({booking.nights} night{booking.nights > 1 ? 's' : ''})</dd></>}
+        {camping && form.tents4 + form.tents2 > 0 && (
+          <><dt>Tents</dt><dd>{Object.entries(TENTS).filter(([k]) => form[k] > 0).map(([k, t]) => `${form[k]} × ${t.label.toLowerCase()}`).join(', ')}</dd></>
+        )}
         <dt>Group</dt><dd>{booking.group_size} {booking.group_size > 1 ? 'people' : 'person'}{booking.viewing_count ? `, ${booking.viewing_count} viewing only` : ''}</dd>
         <dt>Total</dt><dd>{peso(booking.total_amount)}</dd>
         <dt>Paid now</dt><dd>{peso(payment?.amount ?? booking.amount_due)}{payment ? ` via ${payment.method}` : ''}</dd>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { getActivity, createBooking } from '../lib/api'
-import { isCamping, previewPrice } from '../lib/pricing'
+import { isCamping, isRock, previewPrice, TENTS } from '../lib/pricing'
 import { addDays, formatDate } from '../lib/dates'
 import { friendlyError } from '../lib/errors'
 import { Loading, ErrorState, Empty } from '../components/StateView'
@@ -49,6 +49,7 @@ export default function Book() {
   if (activity === null) return <Empty text="This activity isn't available for booking." />
 
   const camping = isCamping(activity)
+  const rock = isRock(activity)
   const stayNights = camping && date ? Array.from({ length: nights }, (_, i) => addDays(date, i)) : []
   const blockedNight = camping && availability
     ? stayNights.find((d) => availability.taken.includes(d) || availability.closed.includes(d))
@@ -75,10 +76,10 @@ export default function Book() {
         contact_number: form.contact.replace(/[\s-]/g, ''),
         email: form.email.trim(),
         group_size: form.groupSize,
-        viewing_count: camping ? 0 : form.viewers,
+        viewing_count: rock ? form.viewers : 0,
         senior_count: form.seniors,
         pwd_count: form.pwd,
-        child_count: camping ? form.children : 0,
+        child_count: rock ? 0 : form.children,
         local_count: form.locals,
         // Price preview from pricing.js (server-side pricing is planned for January)
         total_amount: price.total,
@@ -131,7 +132,7 @@ export default function Book() {
           {date && (
             <p className="selection">
               {camping
-                ? <>Check-in <strong>{formatDate(date)}</strong>, check-out <strong>{formatDate(addDays(date, nights))}</strong></>
+                ? <>Check-in <strong>{formatDate(date)}</strong>, 1:00–6:00 PM. Check-out <strong>{formatDate(addDays(date, nights))}</strong>, 12:00 noon</>
                 : <>Date: <strong>{formatDate(date)}</strong></>}
             </p>
           )}
@@ -161,7 +162,11 @@ export default function Book() {
             {camping && <><dt>Nights</dt><dd>{nights}</dd></>}
             <dt>Name</dt><dd>{form.name}</dd>
             <dt>Contact</dt><dd>{form.contact} · {form.email}</dd>
-            <dt>Group</dt><dd>{form.groupSize}{!camping && form.viewers ? ` (${form.viewers} viewing only)` : ''}</dd>
+            <dt>Group</dt><dd>{form.groupSize}{rock && form.viewers ? ` (${form.viewers} viewing only)` : ''}</dd>
+            {rock && <><dt>Emergency</dt><dd>{form.emergencyName} · {form.emergencyContact}</dd></>}
+            {camping && (form.tents4 + form.tents2 > 0) && (
+              <><dt>Tents</dt><dd>{Object.entries(TENTS).filter(([k]) => form[k] > 0).map(([k, t]) => `${form[k]} × ${t.label.toLowerCase()}`).join(', ')}</dd></>
+            )}
           </dl>
           <PriceSummary price={price} />
           {saveError && <p className="error" role="alert">{saveError}</p>}
