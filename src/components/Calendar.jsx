@@ -57,7 +57,9 @@ const LEGENDS = {
 // Month calendar. `selected` = chosen date; `range` = extra highlighted dates (camping nights).
 // minDate/maxDate optionally limit which dates can be picked.
 export default function Calendar({ activity, selected, onSelect, range = [], minDate, maxDate, onAvailability }) {
-  const start = selected || minDate || todayManila()
+  // Open on the first date that can be booked, so late in the month the guest doesn't land on an all-grey month
+  const earliest = addDays(todayManila(), activity.advance_notice_days ?? 2)
+  const start = selected || (minDate && minDate > earliest ? minDate : earliest)
   const [year, setYear] = useState(Number(start.slice(0, 4)))
   const [month, setMonth] = useState(Number(start.slice(5, 7)) - 1)
   const [availability, setAvailability] = useState(null)

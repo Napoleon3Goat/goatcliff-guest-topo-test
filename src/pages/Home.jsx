@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getActivities } from '../lib/api'
-import { isCamping } from '../lib/pricing'
+import { isCamping, isRock, isViewing } from '../lib/pricing'
 import { pesoShort } from '../lib/dates'
 import { friendlyError } from '../lib/errors'
 import { Loading, ErrorState, Empty } from '../components/StateView'
@@ -22,16 +22,17 @@ export default function Home() {
   }
   useEffect(load, [])
 
-  // Group camping areas by area_group (Lower Area, Upper Area, ...), keeping database order.
+  // Group camping areas by category (set by the Super Admin) or area_group (Lower Area, Upper Area, ...), keeping database order.
   const camping = (activities || []).filter(isCamping)
   const groups = {}
   for (const a of camping) {
-    const key = a.area_group || 'Camping areas'
+    const key = a.category || a.area_group || 'Camping areas'
     ;(groups[key] ||= []).push(a)
   }
   const ORDER = ['Lower Area', 'Upper Area', 'Under the Tree', 'Car Camping Area']
   const groupList = Object.entries(groups).sort(([a], [b]) => (ORDER.indexOf(a) + 99) % 99 - (ORDER.indexOf(b) + 99) % 99)
-  const rock = (activities || []).find((a) => !isCamping(a))
+  const rock = (activities || []).find(isRock)
+  const viewing = (activities || []).find(isViewing)
   const cheapest = camping.length ? Math.min(...camping.map((a) => a.price)) : null
 
   return (
@@ -42,7 +43,7 @@ export default function Home() {
           <dl className="hero-facts">
             {rock && <div><dt>Rock package</dt><dd>{pesoShort(rock.price)}</dd><span>per person</span></div>}
             {cheapest != null && <div><dt>Camping</dt><dd>from {pesoShort(cheapest)}</dd><span>per area, per night</span></div>}
-            <div><dt>Check-in</dt><dd>1 PM</dd><span>check-out 12 noon</span></div>
+            <div><dt>Check-in</dt><dd>1–6 PM</dd><span>check-out 12 noon</span></div>
           </dl>
         </div>
         {activities && <AerialMap areas={camping} />}
@@ -62,10 +63,13 @@ export default function Home() {
             </div>
             <p className="route-meta">
               {rock.min_age ? `Ages ${rock.min_age} and up` : ''}
-              {rock.viewing_price != null ? ` · Viewing only ${pesoShort(rock.viewing_price)}` : ''}
+              {viewing ? ` · Viewing only ${pesoShort(viewing.price)}` : rock.viewing_price != null ? ` · Viewing only ${pesoShort(rock.viewing_price)}` : ''}
               {' · Safety gear and guide included'}
             </p>
-            <Link to={`/activity/${rock.code}`} className="btn-primary">See dates</Link>
+            <div className="rock-book-links">
+              <Link to={`/activity/${rock.code}`} className="btn-primary">See dates</Link>
+              {viewing && <Link to={`/activity/${viewing.code}`} className="btn-secondary">Viewing only</Link>}
+            </div>
           </div>
         </section>
       )}

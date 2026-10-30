@@ -284,3 +284,10 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 }
 
 @media (max-width: 400px) { .site-header .wordmark { display: none; } }
+
+/* Added for the Oct 30 requirements */
+.rock-book-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.counter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 0 20px; }
+.form-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 0 16px; }
+.form select { font: inherit; }
+.detail-photo { width: 100%; max-height: 320px; object-fit: cover; border-radius: var(--radius); border: 1.5px solid var(--ink); margin-bottom: 16px; }
