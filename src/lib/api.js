@@ -5,9 +5,6 @@ import { addDays } from './dates'
 
 const FIFTEEN_MINUTES = 15 * 60 * 1000
 
-// C10 (consent_given_at) is live in DEV only. Production needs that migration before
-// this is switched on there, or every booking would be refused.
-export const SEND_CONSENT = true
 
 // ---------- Activities ----------
 // Guests automatically get only active activities (database access rule).
@@ -27,9 +24,8 @@ export async function getActivity(code) {
 // ---------- Calendar ----------
 // booked_dates() returns only visit_date, nights and people (no names), so guests
 // can see what's taken without seeing anyone's details.
-// calendar_overrides() (closed days / changed caps) is still a draft in the backend;
-// until it exists the calendar simply doesn't show closed days, and the database
-// refuses a booking on a closed day with DATE_CLOSED.
+// closed_dates() lists the days Goatcliff closed (no reasons, which only admins see).
+// A changed daily limit isn't shown to guests; the database still refuses a full day with DAY_FULL.
 export async function getAvailability(activity, fromDate, toDate) {
   const { data, error } = await supabase.rpc('booked_dates', { p_activity_id: activity.id, p_from: fromDate, p_to: toDate })
   if (error) throw error
@@ -46,16 +42,10 @@ export async function getAvailability(activity, fromDate, toDate) {
     }
   }
 
-  const closed = []
-  const caps = {}
-  const overrides = await supabase.rpc('calendar_overrides', { p_activity_id: activity.id, p_from: fromDate, p_to: toDate })
-  if (!overrides.error) {
-    for (const o of overrides.data || []) {
-      if (o.is_closed) closed.push(o.override_date)
-      else if (o.daily_capacity != null) caps[o.override_date] = o.daily_capacity
-    }
-  }
-  return { closed, taken: [...taken], counts, caps }
+  const closedRes = await supabase.rpc('closed_dates', { p_activity_id: activity.id, p_from: fromDate, p_to: toDate })
+  if (closedRes.error) throw closedRes.error
+  const closed = (closedRes.data || []).map((r) => r.closed_date)
+  return { closed, taken: [...taken], counts, caps: {} }
 }
 
 // ---------- Booking ----------
@@ -69,7 +59,8 @@ function makeReference() {
   return 'GC-' + Array.from(bytes, (b) => chars[b % chars.length]).join('')
 }
 
-export async function createBooking(b) {
+// `b` already uses the database column names (Book.jsx builds it).
+export async function createBooking(b, idPhotos = []) {
   const row = {
     reference_number: makeReference(),
     activity_id: b.activity_id,
@@ -85,6 +76,16 @@ export async function createBooking(b) {
     pwd_count: b.pwd_count,
     child_count: b.child_count,
     local_count: b.local_count,
+    province: b.province,
+    found_us: b.found_us,
+    emergency_contact_name: b.emergency_contact_name,
+    emergency_contact_number: b.emergency_contact_number,
+    age_0_7: b.age_0_7, age_8_17: b.age_8_17, age_18_24: b.age_18_24, age_25_34: b.age_25_34,
+    age_35_44: b.age_35_44, age_45_59: b.age_45_59, age_60_up: b.age_60_up,
+    male_count: b.male_count,
+    female_count: b.female_count,
+    tents_for_4: b.tents_for_4,
+    tents_for_2: b.tents_for_2,
     total_amount: b.total_amount,
     amount_due: b.amount_due,
     // Fixed values: the database refuses anything else from a guest
@@ -94,9 +95,26 @@ export async function createBooking(b) {
     amount_paid: 0,
     capacity_override: false,
     hold_expires_at: new Date(Date.now() + FIFTEEN_MINUTES).toISOString(),
-    ...(SEND_CONSENT ? { consent_given_at: b.consent_given_at } : {}),
+    consent_given_at: b.consent_given_at,
   }
   const { error } = await supabase.from('bookings').insert(row)
   if (error) throw error
-  return row
+  // ID photos for the discounts go to the private id-photos bucket, named after the booking
+  // (GC-XXXXXXXX/senior-1.jpg). Only Super Admin and Staff Admin can open them.
+  const failedPhotos = await uploadIdPhotos(row.reference_number, idPhotos)
+  return { ...row, failedPhotos }
+}
+
+// idPhotos: [{ kind: 'senior' | 'pwd' | 'local', file }]. Returns how many could not be uploaded.
+async function uploadIdPhotos(reference, idPhotos) {
+  let failed = 0
+  const counts = {}
+  for (const { kind, file } of idPhotos) {
+    counts[kind] = (counts[kind] || 0) + 1
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+    const { error } = await supabase.storage.from('id-photos')
+      .upload(`${reference}/${kind}-${counts[kind]}.${ext}`, file, { contentType: file.type || 'image/jpeg' })
+    if (error) failed += 1
+  }
+  return failed
 }

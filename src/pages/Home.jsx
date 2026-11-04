@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getActivities } from '../lib/api'
-import { isCamping, isRock, isViewing } from '../lib/pricing'
+import { isCamping, isRock } from '../lib/pricing'
 import { pesoShort } from '../lib/dates'
 import { friendlyError } from '../lib/errors'
 import { Loading, ErrorState, Empty } from '../components/StateView'
@@ -32,7 +32,6 @@ export default function Home() {
   const ORDER = ['Lower Area', 'Upper Area', 'Under the Tree', 'Car Camping Area']
   const groupList = Object.entries(groups).sort(([a], [b]) => (ORDER.indexOf(a) + 99) % 99 - (ORDER.indexOf(b) + 99) % 99)
   const rock = (activities || []).find(isRock)
-  const viewing = (activities || []).find(isViewing)
   const cheapest = camping.length ? Math.min(...camping.map((a) => a.price)) : null
 
   return (
@@ -63,13 +62,10 @@ export default function Home() {
             </div>
             <p className="route-meta">
               {rock.min_age ? `Ages ${rock.min_age} and up` : ''}
-              {viewing ? ` · Viewing only ${pesoShort(viewing.price)}` : rock.viewing_price != null ? ` · Viewing only ${pesoShort(rock.viewing_price)}` : ''}
+              {rock.viewing_price != null ? ` · Viewing only ${pesoShort(rock.viewing_price)}, all ages` : ''}
               {' · Safety gear and guide included'}
             </p>
-            <div className="rock-book-links">
-              <Link to={`/activity/${rock.code}`} className="btn-primary">See dates</Link>
-              {viewing && <Link to={`/activity/${viewing.code}`} className="btn-secondary">Viewing only</Link>}
-            </div>
+            <Link to={`/activity/${rock.code}`} className="btn-primary">See dates</Link>
           </div>
         </section>
       )}

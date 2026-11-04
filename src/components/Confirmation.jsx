@@ -26,6 +26,9 @@ export default function Confirmation({ booking, activity, form, payment }) {
       <h1>Receipt</h1>
       <p className="muted">Booking reference</p>
       <p className="reference">{booking.reference_number}</p>
+      {booking.failedPhotos > 0 && (
+        <p className="error" role="alert">{booking.failedPhotos} ID photo{booking.failedPhotos > 1 ? 's' : ''} didn't upload. Bring the IDs on arrival so the discount can still be checked.</p>
+      )}
 
       <dl className="facts left">
         <dt>Activity</dt><dd>{camping ? `Camping area ${activity.code}` : activity.name}</dd>

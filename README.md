@@ -51,18 +51,20 @@ Price previews are in `src/lib/pricing.js`; the official price always comes from
 - `src/components/PaymentStep.jsx`: Goatcliff's real GCash name and number.
 - Check that `activities.type` is `'camping'` for camping areas (see `isCamping` in `src/lib/pricing.js`).
 
-## Demo mode and GitHub Pages
+## Hosting on Vercel
 
-- **No `.env` file (or empty Supabase settings) = DEMO MODE.** The site uses made-up data from
-  `src/lib/demoClient.js`; bookings are not saved anywhere.
-- **Publish on GitHub Pages:** push this folder to the `main` branch, then in the repository go to
-  **Settings → Pages → Build and deployment → Source: GitHub Actions**. The workflow in
-  `.github/workflows/deploy.yml` builds and publishes the site (for example
-  `https://napoleon3goat.github.io/User_frontend/`).
-- Page links look like `…/User_frontend/#/help`. The `#` lets every page open on GitHub Pages.
-- To connect the real database later, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` under
-  **Settings → Secrets and variables → Actions → Variables**. Before that, the `consent_given_at` column
-  must exist in that database (or set `SEND_CONSENT = false` in `src/lib/api.js`).
+1. On vercel.com, **Add New → Project → Import** this GitHub repository.
+2. Vercel detects Vite. Keep the defaults (build `npm run build`, output `dist`) and click **Deploy**.
+   Until step 3 the site shows a "not connected yet" page.
+3. **Settings → Environment Variables**, add both, then **Deployments → ⋯ → Redeploy**:
+   - `VITE_SUPABASE_URL` (Supabase: Project Settings → API → Project URL)
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` (the publishable / anon key; never the secret or service_role key)
+4. Every push to `main` deploys again by itself.
+
+Point both sites at **goatcliff-dev** first and test there. Switch the two values to prod only after the prod
+database has the same changes (see the backend repo's release steps).
+
+Page links look like `…/#/bookings`. The `#` lets every page open on any host without extra settings.
 
 ## Design
 

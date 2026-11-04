@@ -7,11 +7,12 @@ import { friendlyError } from '../lib/errors'
 import { Loading, ErrorState, Empty } from '../components/StateView'
 import Calendar from '../components/Calendar'
 import Counter from '../components/Counter'
-import GuestForm, { EMPTY_FORM, validate } from '../components/GuestForm'
+import GuestForm, { EMPTY_FORM, AGE_GROUPS, validate } from '../components/GuestForm'
 import PriceSummary from '../components/PriceSummary'
 import PaymentStep from '../components/PaymentStep'
 import Confirmation from '../components/Confirmation'
 
+const AGE_COLS = ['age_0_7', 'age_8_17', 'age_18_24', 'age_25_34', 'age_35_44', 'age_45_59', 'age_60_up']
 const STEPS = ['Date', 'Details', 'Review', 'Payment', 'Receipt']
 const MAX_NIGHTS = 14
 
@@ -81,11 +82,20 @@ export default function Book() {
         pwd_count: form.pwd,
         child_count: rock ? 0 : form.children,
         local_count: form.locals,
+        province: form.province.trim() || null,
+        found_us: form.foundUs || null,
+        emergency_contact_name: rock ? form.emergencyName.trim() : null,
+        emergency_contact_number: rock ? form.emergencyContact.replace(/[\s-]/g, '') : null,
+        ...Object.fromEntries(AGE_GROUPS.map((g, i) => [AGE_COLS[i], form.ages[g]])),
+        male_count: form.sexes.male,
+        female_count: form.sexes.female,
+        tents_for_4: camping ? form.tents4 : 0,
+        tents_for_2: camping ? form.tents2 : 0,
         // Price preview from pricing.js (server-side pricing is planned for January)
         total_amount: price.total,
         amount_due: price.downPayment,
         consent_given_at: form.consentAt,
-      })
+      }, Object.entries(form.idPhotos).flatMap(([kind, files]) => files.map((file) => ({ kind, file }))))
       setBooking(saved)
       setStep(3)
     } catch (e) {

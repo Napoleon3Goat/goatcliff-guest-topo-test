@@ -1,9 +1,12 @@
 import Counter from './Counter'
-import { isCamping, isRock, isViewing, discountedCount, TENTS } from '../lib/pricing'
+import { isCamping, isRock, discountedCount, TENTS } from '../lib/pricing'
 
 export const AGE_GROUPS = ['0–7', '8–17', '18–24', '25–34', '35–44', '45–59', '60+']
-// Answers from Goatcliff's customer survey (Oct 2026), plus Other
-export const FOUND_VIA = ['TikTok', 'Facebook', 'Friends or family', 'Google', 'Other']
+// Answers from Goatcliff's customer survey (Oct 2026), plus Other. Keys are the database values.
+export const FOUND_US = { tiktok: 'TikTok', facebook: 'Facebook', friends_family: 'Friends or family', google: 'Google', other: 'Other' }
+// One ID photo per discounted person. The key is also the file name in storage (senior-1.jpg).
+const ID_KINDS = [['senior', 'seniors', 'Senior citizen IDs'], ['pwd', 'pwd', 'PWD IDs'], ['local', 'locals', 'Atok local IDs']]
+const MAX_PHOTO = 5 * 1024 * 1024
 
 export const EMPTY_FORM = {
   name: '',
@@ -17,13 +20,12 @@ export const EMPTY_FORM = {
   locals: 0, // Atok locals
   viewers: 0, // rock only
   ageConfirmed: false, // rock only
-  // Added after the Oct 25 interview (FR-15, FR-20, FR-33). The database has no columns for these yet,
-  // so api.js does not send them; they are shown in the demo only.
-  idPhotos: [], // file names of the ID photos for senior / PWD / Atok local discounts
+  // Added after the Oct 25 interview (FR-15, FR-20, FR-29, FR-33)
+  idPhotos: { senior: [], pwd: [], local: [] }, // the chosen photo files, one per discounted person
   ages: Object.fromEntries(AGE_GROUPS.map((g) => [g, 0])),
   sexes: { male: 0, female: 0 },
   province: '',
-  foundVia: '',
+  foundUs: '',
   emergencyName: '', // rock only
   emergencyContact: '', // rock only
   tents4: 0, // camping only
@@ -45,7 +47,13 @@ export function validate(activity, form) {
   if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) errors.email = 'Enter a valid email. Your reference number is sent here.'
   if (g < 1) errors.groupSize = 'At least 1 person.'
   if (discountedCount(form) > g) errors.discounts = 'One discount per person: the discount counts can\'t add up to more than the group.'
-  if (form.seniors + form.pwd + form.locals > 0 && form.idPhotos.length === 0) errors.idPhotos = 'Upload a photo of the ID for each discount.'
+  for (const [kind, field, label] of ID_KINDS) {
+    const files = form.idPhotos[kind] || []
+    if (files.length !== form[field]) errors.idPhotos = `${label}: choose ${form[field]} photo${form[field] === 1 ? '' : 's'}, one per person.`
+    else if (files.some((f) => f.size > MAX_PHOTO)) errors.idPhotos = 'Each ID photo must be 5 MB or smaller.'
+    else if (files.some((f) => f.type && !f.type.startsWith('image/'))) errors.idPhotos = 'ID photos must be pictures (JPG or PNG).'
+    if (errors.idPhotos) break
+  }
   if (sum(form.ages) !== g) errors.ages = `The age groups must add up to ${g}.`
   if (form.sexes.male + form.sexes.female !== g) errors.sexes = `Male and female must add up to ${g}.`
   if (isRock(activity)) {
@@ -97,9 +105,9 @@ export default function GuestForm({ activity, form, setForm, errors }) {
 
       <label>
         How did you find Goatcliff? <span className="hint">(optional)</span>
-        <select value={form.foundVia} onChange={setText('foundVia')}>
+        <select value={form.foundUs} onChange={setText('foundUs')}>
           <option value="">Choose…</option>
-          {FOUND_VIA.map((f) => <option key={f}>{f}</option>)}
+          {Object.entries(FOUND_US).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
         </select>
       </label>
 
@@ -142,15 +150,15 @@ export default function GuestForm({ activity, form, setForm, errors }) {
       <Counter label="Children 7 and below" hint={rock ? 'Viewing only' : undefined} value={form.children} onChange={set('children')} />
       {errors.discounts && <span className="field-error">{errors.discounts}</span>}
       {errors.children && <span className="field-error">{errors.children}</span>}
-      {needsId && (
-        <label>
-          ID photos for the senior, PWD and Atok local discounts
-          <input type="file" accept="image/*" multiple
-            onChange={(e) => set('idPhotos')(Array.from(e.target.files || []).map((f) => f.name))} />
-          {form.idPhotos.length > 0 && <span className="hint">{form.idPhotos.length} photo{form.idPhotos.length > 1 ? 's' : ''} chosen</span>}
-          {errors.idPhotos && <span className="field-error">{errors.idPhotos}</span>}
+      {needsId && ID_KINDS.filter(([, field]) => form[field] > 0).map(([kind, field, label]) => (
+        <label key={kind}>
+          {label} <span className="hint">({form[field]} photo{form[field] > 1 ? 's' : ''}, one per person)</span>
+          <input type="file" accept="image/*" multiple={form[field] > 1}
+            onChange={(e) => setIn('idPhotos', kind)(Array.from(e.target.files || []))} />
+          {form.idPhotos[kind]?.length > 0 && <span className="hint">{form.idPhotos[kind].length} chosen</span>}
         </label>
-      )}
+      ))}
+      {errors.idPhotos && <span className="field-error">{errors.idPhotos}</span>}
 
       <h3>Ages</h3>
       <div className="counter-grid">
@@ -196,4 +204,3 @@ export default function GuestForm({ activity, form, setForm, errors }) {
   )
 }
 
-export { isViewing }

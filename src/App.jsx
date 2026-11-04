@@ -4,9 +4,18 @@ import Home from './pages/Home'
 import ActivityDetail from './pages/ActivityDetail'
 import Book from './pages/Book'
 import Help from './pages/Help'
+import { isConnected } from './lib/supabase'
 
 // Guest pages. No login needed for any of them.
 export default function App() {
+  if (!isConnected) {
+    return (
+      <div className="state">
+        <h1>Goatcliff bookings are opening soon</h1>
+        <p>For now, message us on our Facebook Page to book.</p>
+      </div>
+    )
+  }
   return (
     <Routes>
       <Route element={<Layout />}>
