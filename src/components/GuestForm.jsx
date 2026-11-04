@@ -7,6 +7,8 @@ export const FOUND_US = { tiktok: 'TikTok', facebook: 'Facebook', friends_family
 // One ID photo per discounted person. The key is also the file name in storage (senior-1.jpg).
 const ID_KINDS = [['senior', 'seniors', 'Senior citizen IDs'], ['pwd', 'pwd', 'PWD IDs'], ['local', 'locals', 'Atok local IDs']]
 const MAX_PHOTO = 5 * 1024 * 1024
+// The id-photos storage only accepts these (iPhone HEIC photos would be refused)
+const PHOTO_TYPES = 'image/jpeg,image/png,image/webp'
 
 export const EMPTY_FORM = {
   name: '',
@@ -51,7 +53,7 @@ export function validate(activity, form) {
     const files = form.idPhotos[kind] || []
     if (files.length !== form[field]) errors.idPhotos = `${label}: choose ${form[field]} photo${form[field] === 1 ? '' : 's'}, one per person.`
     else if (files.some((f) => f.size > MAX_PHOTO)) errors.idPhotos = 'Each ID photo must be 5 MB or smaller.'
-    else if (files.some((f) => f.type && !f.type.startsWith('image/'))) errors.idPhotos = 'ID photos must be pictures (JPG or PNG).'
+    else if (files.some((f) => !PHOTO_TYPES.split(',').includes(f.type))) errors.idPhotos = 'ID photos must be JPG, PNG or WebP. On an iPhone, take a screenshot of the photo and upload that.'
     if (errors.idPhotos) break
   }
   if (sum(form.ages) !== g) errors.ages = `The age groups must add up to ${g}.`
@@ -153,7 +155,7 @@ export default function GuestForm({ activity, form, setForm, errors }) {
       {needsId && ID_KINDS.filter(([, field]) => form[field] > 0).map(([kind, field, label]) => (
         <label key={kind}>
           {label} <span className="hint">({form[field]} photo{form[field] > 1 ? 's' : ''}, one per person)</span>
-          <input type="file" accept="image/*" multiple={form[field] > 1}
+          <input type="file" accept={PHOTO_TYPES} multiple={form[field] > 1}
             onChange={(e) => setIn('idPhotos', kind)(Array.from(e.target.files || []))} />
           {form.idPhotos[kind]?.length > 0 && <span className="hint">{form.idPhotos[kind].length} chosen</span>}
         </label>

@@ -4,6 +4,7 @@ const MESSAGES = [
   ['no_double_booking_camping', 'Someone just booked this area for those nights. Please pick another area or date.'],
   ['DAY_FULL', 'That day is full for the rock activity. Please pick another date.'],
   ['DATE_CLOSED', 'Goatcliff is closed on that date.'],
+  ['TENTS_FULL', 'Not enough tents left on one of those nights.'],
   ['check constraint', 'Some of the numbers in your form don\'t add up. Please check the group size and discount counts.'],
   ['consent_given_at', 'Please tick "I agree to the Privacy Notice and Booking Terms" before booking.'],
 ]

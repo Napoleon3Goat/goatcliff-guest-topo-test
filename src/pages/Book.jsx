@@ -17,7 +17,7 @@ const STEPS = ['Date', 'Details', 'Review', 'Payment', 'Receipt']
 const MAX_NIGHTS = 14
 
 // The whole booking flow on one page, one step at a time:
-// 0 pick date → 1 guest details → 2 review & confirm → 3 pay (15-min hold) → 4 confirmation
+// 0 pick date → 1 guest details → 2 review & confirm → 3 pay (demo payment screen) → 4 confirmation
 export default function Book() {
   const { code } = useParams()
   const { state } = useLocation() // set when coming from "Add a rock activity?" after camping

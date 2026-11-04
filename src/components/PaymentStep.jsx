@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { peso } from '../lib/dates'
 
 // TODO: replace with Goatcliff's real Facebook Page name (shown on the Help page).
@@ -18,14 +18,8 @@ const METHODS = [
 // For now steps 1–3 are skipped: choosing a wallet and tapping Pay goes straight to the receipt.
 // Nothing is charged and no money moves.
 export default function PaymentStep({ booking, onDone, onStartOver }) {
-  const [secondsLeft, setSecondsLeft] = useState(() => secondsUntil(booking.hold_expires_at))
   const [method, setMethod] = useState('gcash')
   const [paying, setPaying] = useState(false)
-
-  useEffect(() => {
-    const timer = setInterval(() => setSecondsLeft(secondsUntil(booking.hold_expires_at)), 1000)
-    return () => clearInterval(timer)
-  }, [booking.hold_expires_at])
 
   function pay() {
     setPaying(true)
@@ -40,25 +34,10 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
     }, 1200)
   }
 
-  if (secondsLeft <= 0 && !paying) {
-    return (
-      <div className="card center">
-        <h2>Your 15-minute hold has ended</h2>
-        <button className="btn-primary" onClick={onStartOver}>Start over</button>
-      </div>
-    )
-  }
-
-  const minutes = Math.floor(secondsLeft / 60)
-  const seconds = String(secondsLeft % 60).padStart(2, '0')
   const chosen = METHODS.find((m) => m.id === method).name
 
   return (
     <div className="card">
-      <div className={secondsLeft < 180 ? 'timer urgent' : 'timer'}>
-        Spot held for <strong>{minutes}:{seconds}</strong>
-      </div>
-
       <h2>Pay the down payment</h2>
       <p className="big-amount">{peso(booking.amount_due)}</p>
 
@@ -80,9 +59,6 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
   )
 }
 
-function secondsUntil(iso) {
-  return Math.max(0, Math.floor((new Date(iso) - Date.now()) / 1000))
-}
 
 // A made-up 13-digit payment reference, like the one GCash or Maya shows.
 function makeTransactionId() {

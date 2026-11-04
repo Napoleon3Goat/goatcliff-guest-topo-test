@@ -3,7 +3,6 @@
 import { supabase } from './supabase'
 import { addDays } from './dates'
 
-const FIFTEEN_MINUTES = 15 * 60 * 1000
 
 
 // ---------- Activities ----------
@@ -94,7 +93,8 @@ export async function createBooking(b, idPhotos = []) {
     attendance_status: 'upcoming',
     amount_paid: 0,
     capacity_override: false,
-    hold_expires_at: new Date(Date.now() + FIFTEEN_MINUTES).toISOString(),
+    // No hold_expires_at: hold expiry is Capstone 2. Without it the database keeps counting an unpaid
+    // booking toward the daily limit, the same way the calendar does, so a day can't be overbooked.
     consent_given_at: b.consent_given_at,
   }
   const { error } = await supabase.from('bookings').insert(row)
