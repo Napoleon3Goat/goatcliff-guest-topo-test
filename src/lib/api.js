@@ -118,3 +118,11 @@ async function uploadIdPhotos(reference, idPhotos) {
   }
   return failed
 }
+
+// Check my booking: one booking, only when the reference AND the email match (lookup_booking).
+// Returns null when nothing matches.
+export async function lookupBooking(reference, email) {
+  const { data, error } = await supabase.rpc('lookup_booking', { p_reference: reference, p_email: email.trim() })
+  if (error) throw error
+  return data?.[0] || null
+}

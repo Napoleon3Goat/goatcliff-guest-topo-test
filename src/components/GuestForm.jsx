@@ -146,6 +146,8 @@ export default function GuestForm({ activity, form, setForm, errors }) {
       )}
 
       <h3>Discounts</h3>
+      {/* Organizer bookings (20% off the whole group) are entered by staff only; the database refuses them from the website. */}
+      <p className="hint">Booking for a school, company or other organized group? Message us on our Facebook Page for the organizer rate.</p>
       <Counter label="Senior citizens" value={form.seniors} onChange={set('seniors')} />
       <Counter label="PWDs" value={form.pwd} onChange={set('pwd')} />
       <Counter label="Atok locals" value={form.locals} onChange={set('locals')} />

@@ -1,11 +1,14 @@
 import { FACEBOOK_PAGE } from '../components/PaymentStep'
+import CheckBooking from '../components/CheckBooking'
 
-// Guests can't read or cancel bookings online (database rule), so this page tells them
-// how to reach Goatcliff instead.
+// Guests check a booking with its reference + email. Cancelling or rescheduling still goes
+// through Goatcliff (guests can't change bookings online), so the contact details are here too.
 export default function Help() {
   return (
     <div className="narrow">
       <h1>Check, cancel or reschedule</h1>
+
+      <CheckBooking />
 
       <div className="card">
         <h2>Contact Goatcliff</h2>
