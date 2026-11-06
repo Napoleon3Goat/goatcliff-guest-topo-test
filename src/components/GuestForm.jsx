@@ -1,4 +1,5 @@
 import Counter from './Counter'
+import Waiver from './Waiver'
 import { isCamping, isRock, discountedCount, TENTS } from '../lib/pricing'
 
 export const AGE_GROUPS = ['0–7', '8–17', '18–24', '25–34', '35–44', '45–59', '60+']
@@ -194,14 +195,17 @@ export default function GuestForm({ activity, form, setForm, errors }) {
       )}
       {errors.ageConfirmed && <span className="field-error">{errors.ageConfirmed}</span>}
 
+      {/* The waiver covers the rock activities (rappelling and via ferrata), so it's shown on rock bookings only. */}
       <details className="terms">
-        <summary>Read the Privacy Notice, Booking Terms and waiver</summary>
+        <summary>Read the Privacy Notice{rock ? ', Booking Terms and waiver' : ' and Booking Terms'}</summary>
+        {rock && <Waiver />}
+        <h3>Privacy Notice and Booking Terms</h3>
         <p className="terms-tbd">To be filled in by Goatcliff.</p>
       </details>
       <label className="check consent">
         <input type="checkbox" checked={form.consent}
           onChange={(e) => setForm({ ...form, consent: e.target.checked, consentAt: e.target.checked ? new Date().toISOString() : null })} />
-        <span>I agree to the Privacy Notice, Booking Terms and waiver.</span>
+        <span>I agree to the Privacy Notice{rock ? ', Booking Terms and waiver' : ' and Booking Terms'}.</span>
       </label>
       {errors.consent && <span className="field-error">{errors.consent}</span>}
     </div>

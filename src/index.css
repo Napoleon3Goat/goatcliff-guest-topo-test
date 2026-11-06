@@ -291,3 +291,9 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 .form-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 0 16px; }
 .form select { font: inherit; }
 .detail-photo { width: 100%; max-height: 320px; object-fit: cover; border-radius: var(--radius); border: 1.5px solid var(--ink); margin-bottom: 16px; }
+.waiver { margin-top: 10px; font-size: 0.88rem; line-height: 1.55; }
+.waiver h3 { margin: 4px 0 8px; }
+.waiver h4 { margin: 14px 0 4px; font-size: 0.92rem; }
+.waiver p { margin: 0 0 8px; }
+.waiver ol { padding-left: 20px; display: grid; gap: 6px; margin: 0 0 8px; }
+.terms > h3 { margin: 14px 0 0; font-size: 1rem; }

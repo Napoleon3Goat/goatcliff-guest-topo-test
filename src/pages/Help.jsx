@@ -1,5 +1,6 @@
 import { FACEBOOK_PAGE } from '../components/PaymentStep'
 import CheckBooking from '../components/CheckBooking'
+import Waiver from '../components/Waiver'
 
 // Guests check a booking with its reference + email. Cancelling or rescheduling still goes
 // through Goatcliff (guests can't change bookings online), so the contact details are here too.
@@ -14,6 +15,7 @@ export default function Help() {
         <h2>Contact Goatcliff</h2>
         <dl className="facts">
           <dt>Facebook</dt><dd>{FACEBOOK_PAGE}</dd>
+          <dt>Email</dt><dd><a href="mailto:goatcliff_2023@gmail.com">goatcliff_2023@gmail.com</a></dd>
           <dt>Mobile</dt><dd>09XX XXX XXXX</dd>
           <dt>Where</dt><dd>Tagongtongao, Paoay, Atok, Benguet</dd>
         </dl>
@@ -28,6 +30,11 @@ export default function Help() {
           <li><strong>Discounts</strong> for seniors, PWDs and Atok locals are checked with an ID on arrival.</li>
         </ul>
       </div>
+
+      <details className="card terms">
+        <summary>Rock activities waiver</summary>
+        <Waiver />
+      </details>
     </div>
   )
 }
