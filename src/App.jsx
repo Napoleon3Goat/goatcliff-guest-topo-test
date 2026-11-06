@@ -11,7 +11,7 @@ export default function App() {
   if (!isConnected) {
     return (
       <div className="state">
-        <h1>Goatcliff bookings are opening soon</h1>
+        <h1>Goat Cliff bookings are opening soon</h1>
         <p>For now, message us on our Facebook Page to book.</p>
       </div>
     )

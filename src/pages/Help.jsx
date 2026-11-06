@@ -12,11 +12,10 @@ export default function Help() {
       <CheckBooking />
 
       <div className="card">
-        <h2>Contact Goatcliff</h2>
+        <h2>Contact Goat Cliff</h2>
         <dl className="facts">
           <dt>Facebook</dt><dd>{FACEBOOK_PAGE}</dd>
           <dt>Email</dt><dd><a href="mailto:goatcliff_2023@gmail.com">goatcliff_2023@gmail.com</a></dd>
-          <dt>Mobile</dt><dd>09XX XXX XXXX</dd>
           <dt>Where</dt><dd>Tagongtongao, Paoay, Atok, Benguet</dd>
         </dl>
       </div>

@@ -283,7 +283,7 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
   .site-header .wordmark { font-size: 1.6rem; }
 }
 
-@media (max-width: 400px) { .site-header .wordmark { display: none; } }
+@media (max-width: 430px) { .site-header .wordmark { display: none; } }
 
 /* Added for the Oct 30 requirements */
 .rock-book-links { display: flex; gap: 8px; flex-wrap: wrap; }

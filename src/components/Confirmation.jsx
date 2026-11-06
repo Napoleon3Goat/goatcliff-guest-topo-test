@@ -60,7 +60,7 @@ export default function Confirmation({ booking, activity, form, payment }) {
       )}
 
       <p className="muted">Keep this reference. To check your booking later, go to Help and enter it with your email.</p>
-      <Link to="/help" className="btn-secondary">Check my booking or contact Goatcliff</Link>
+      <Link to="/help" className="btn-secondary">Check my booking or contact Goat Cliff</Link>
     </div>
   )
 }

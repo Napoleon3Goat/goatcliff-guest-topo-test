@@ -13,7 +13,7 @@ const SPOTS = {
 export default function AerialMap({ areas }) {
   return (
     <figure className="aerial">
-      <img src={aerial} alt="Aerial photo of Goatcliff showing the camping areas, emergency rooms and parking" />
+      <img src={aerial} alt="Aerial photo of Goat Cliff showing the camping areas, emergency rooms and parking" />
       {areas.map((a) => {
         const s = SPOTS[a.code]
         if (!s) return null

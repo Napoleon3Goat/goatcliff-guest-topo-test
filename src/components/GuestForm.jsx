@@ -107,7 +107,7 @@ export default function GuestForm({ activity, form, setForm, errors }) {
       </label>
 
       <label>
-        How did you find Goatcliff? <span className="hint">(optional)</span>
+        How did you find Goat Cliff? <span className="hint">(optional)</span>
         <select value={form.foundUs} onChange={setText('foundUs')}>
           <option value="">Choose…</option>
           {Object.entries(FOUND_US).map(([k, label]) => <option key={k} value={k}>{label}</option>)}
@@ -200,7 +200,7 @@ export default function GuestForm({ activity, form, setForm, errors }) {
         <summary>Read the Privacy Notice{rock ? ', Booking Terms and waiver' : ' and Booking Terms'}</summary>
         {rock && <Waiver />}
         <h3>Privacy Notice and Booking Terms</h3>
-        <p className="terms-tbd">To be filled in by Goatcliff.</p>
+        <p className="terms-tbd">To be filled in by Goat Cliff.</p>
       </details>
       <label className="check consent">
         <input type="checkbox" checked={form.consent}

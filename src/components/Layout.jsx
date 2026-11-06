@@ -6,9 +6,9 @@ export default function Layout() {
   return (
     <div className="site">
       <header className="site-header">
-        <Link to="/" className="brand" aria-label="Goatcliff home">
+        <Link to="/" className="brand" aria-label="Goat Cliff home">
           <img src={logo} alt="" className="brand-logo" />
-          <span className="wordmark">Goatcliff</span>
+          <span className="wordmark">Goat Cliff</span>
         </Link>
         <nav aria-label="Main">
           <NavLink to="/" end>Book</NavLink>
@@ -23,7 +23,7 @@ export default function Layout() {
       </main>
 
       <footer className="site-footer">
-        <p><strong>Goatcliff Adventure and Camping</strong> · Tagongtongao, Paoay, Atok, Benguet</p>
+        <p><strong>Goat Cliff Rock Adventures and Camping</strong> · Tagongtongao, Paoay, Atok, Benguet</p>
         <p>Questions? Message us on our Facebook Page.</p>
       </footer>
     </div>

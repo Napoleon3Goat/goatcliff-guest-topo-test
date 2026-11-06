@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { peso } from '../lib/dates'
 
 // TODO: replace with Goatcliff's real Facebook Page name (shown on the Help page).
-export const FACEBOOK_PAGE = 'Goatcliff Adventure and Camping'
+export const FACEBOOK_PAGE = 'Goat Cliff Rock Adventures and Camping'
 
 // The two e-wallets the guest can pick.
 const METHODS = [
