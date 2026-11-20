@@ -83,7 +83,7 @@ export default function Book() {
         pwd_count: form.pwd,
         child_count: rock ? 0 : form.children,
         local_count: form.locals,
-        province: provinceToSave(form.provinceChoice, form.provinceOther),
+        province: provinceToSave(form.province),
         found_us: form.foundUs || null,
         emergency_contact_name: rock ? form.emergencyName.trim() : null,
         emergency_contact_number: rock ? form.emergencyContact.replace(/[\s-]/g, '') : null,

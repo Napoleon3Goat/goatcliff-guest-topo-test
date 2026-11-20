@@ -1,6 +1,6 @@
 import Counter from './Counter'
 import Waiver from './Waiver'
-import ProvincePicker from './ProvincePicker'
+import ProvincePicker, { EMPTY_PROVINCE, provinceError } from './ProvincePicker'
 import { isCamping, isRock, discountedCount, TENTS } from '../lib/pricing'
 
 export const AGE_GROUPS = ['0–7', '8–17', '18–24', '25–34', '35–44', '45–59', '60+']
@@ -28,8 +28,7 @@ export const EMPTY_FORM = {
   idPhotos: { senior: [], pwd: [], local: [] }, // the chosen photo files, one per discounted person
   ages: Object.fromEntries(AGE_GROUPS.map((g) => [g, 0])),
   sexes: { male: 0, female: 0 },
-  provinceChoice: '', // picked from the list (or "Others")
-  provinceOther: '', // typed when "Others" is picked
+  province: EMPTY_PROVINCE, // { text, choice, other } from the province picker
   foundUs: '',
   emergencyName: '', // rock only
   emergencyContact: '', // rock only
@@ -61,6 +60,7 @@ export function validate(activity, form) {
   }
   if (sum(form.ages) !== g) errors.ages = `The age groups must add up to ${g}.`
   if (form.sexes.male + form.sexes.female !== g) errors.sexes = `Male and female must add up to ${g}.`
+  if (provinceError(form.province)) errors.province = provinceError(form.province)
   if (isRock(activity)) {
     if (form.viewers > g) errors.viewers = 'Viewers can\'t be more than the group.'
     if (form.children > form.viewers) errors.children = 'Children 7 and below can only join as viewers.'
@@ -103,12 +103,7 @@ export default function GuestForm({ activity, form, setForm, errors }) {
         {errors.email && <span className="field-error">{errors.email}</span>}
       </label>
 
-      <ProvincePicker
-        choice={form.provinceChoice}
-        other={form.provinceOther}
-        onChoice={set('provinceChoice')}
-        onOther={set('provinceOther')}
-      />
+      <ProvincePicker value={form.province} onChange={set('province')} error={errors.province} />
 
       <label>
         How did you find Goat Cliff? <span className="hint">(optional)</span>
