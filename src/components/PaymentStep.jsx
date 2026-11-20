@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { peso } from '../lib/dates'
-import { submitPayment } from '../lib/api'
+import { getWallets, submitPayment } from '../lib/api'
 import { friendlyError } from '../lib/errors'
-import { WALLETS } from '../lib/paymentInfo'
 
 // TODO: replace with Goatcliff's real Facebook Page name (shown on the Help page).
 export const FACEBOOK_PAGE = 'Goat Cliff Rock Adventures and Camping'
@@ -18,6 +17,8 @@ const SCREENSHOT_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 // Staff check it later. After 5 minutes the database refuses the proof and the spot opens again.
 // (A payment gateway that confirms by itself is planned for January.)
 export default function PaymentStep({ booking, onDone, onStartOver }) {
+  const [wallets, setWallets] = useState(null) // Goat Cliff's GCash / Maya details (from the database)
+  const [walletError, setWalletError] = useState('')
   const [method, setMethod] = useState('gcash')
   const [reference, setReference] = useState('')
   const [receipt, setReceipt] = useState(null)
@@ -25,6 +26,16 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const [timeUp, setTimeUp] = useState(false)
+
+  // Load Goat Cliff's GCash / Maya details once
+  useEffect(() => {
+    getWallets()
+      .then((list) => {
+        setWallets(list)
+        if (list.length > 0) setMethod(list[0].id) // pick the first one that's on
+      })
+      .catch((e) => setWalletError(friendlyError(e)))
+  }, [])
 
   // Count down once every second
   useEffect(() => {
@@ -36,7 +47,7 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
     return () => clearInterval(timer)
   }, [booking.payBefore])
 
-  const wallet = WALLETS.find((w) => w.id === method)
+  const wallet = wallets ? wallets.find((w) => w.id === method) : null
 
   function pickScreenshot(e) {
     const file = e.target.files[0] || null
@@ -56,6 +67,7 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
     e.preventDefault()
     if (reference.trim() === '') return setError('Enter the reference number from your receipt.')
     if (!receipt) return setError('Attach a screenshot of your receipt.')
+    if (!wallet) return setError('Choose GCash or Maya.')
     setSending(true)
     setError('')
     try {
@@ -85,6 +97,21 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
     )
   }
 
+  // Still loading the payment details, or they couldn't load
+  if (!wallets || wallets.length === 0) {
+    return (
+      <div className="card">
+        <p className={secondsLeft <= 60 ? 'timer urgent' : 'timer'}>Spot held for you: <strong>{clock(secondsLeft)}</strong></p>
+        <h2>Pay the down payment</h2>
+        {walletError && <p className="error" role="alert">{walletError}</p>}
+        {!walletError && !wallets && <p className="muted">Loading the payment details…</p>}
+        {wallets && wallets.length === 0 && (
+          <p className="error" role="alert">Online payment isn't available right now. Please message us on Facebook ({FACEBOOK_PAGE}).</p>
+        )}
+      </div>
+    )
+  }
+
   return (
     <form className="card" onSubmit={send}>
       <p className={secondsLeft <= 60 ? 'timer urgent' : 'timer'} role="timer" aria-live="off">
@@ -96,7 +123,7 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
 
       <fieldset className="pay-methods" disabled={sending}>
         <legend>Pay with</legend>
-        {WALLETS.map((w) => (
+        {wallets.map((w) => (
           <label key={w.id} className={method === w.id ? 'pay-method on' : 'pay-method'}>
             <input type="radio" name="method" value={w.id} checked={method === w.id} onChange={() => setMethod(w.id)} />
             <span className={'wallet wallet-' + w.id} aria-hidden="true">{w.name}</span>
@@ -106,14 +133,15 @@ export default function PaymentStep({ booking, onDone, onStartOver }) {
       </fieldset>
 
       <div className="pay-to">
-        <SampleQr seed={method === 'gcash' ? 7 : 11} label={`Sample ${wallet.name} QR code`} />
+        {wallet.qrUrl
+          ? <img className="qr" src={wallet.qrUrl} alt={`Goat Cliff's ${wallet.name} QR code`} />
+          : <p className="qr qr-missing">No QR yet. Send to the number.</p>}
         <dl className="facts">
-          <dt>Send to</dt><dd><strong>{wallet.number}</strong></dd>
-          <dt>Name</dt><dd>{wallet.accountName}</dd>
+          <dt>Send to</dt><dd><strong>{wallet.account_number}</strong></dd>
+          <dt>Name</dt><dd>{wallet.account_name}</dd>
           <dt>Amount</dt><dd><strong>{peso(booking.amount_due)}</strong></dd>
         </dl>
       </div>
-      <p className="hint">Sample QR and number for the demo. Nothing is charged.</p>
 
       <ol className="steps">
         <li>Open {wallet.name}, scan the QR or send to the number above.</li>
@@ -152,35 +180,4 @@ function clock(seconds) {
   const minutes = Math.floor(seconds / 60)
   const rest = String(seconds % 60).padStart(2, '0')
   return `${minutes}:${rest}`
-}
-
-// A made-up QR-looking picture for the demo (it can't be scanned).
-// Replace with Goat Cliff's real QR images later.
-function SampleQr({ seed, label }) {
-  const size = 21
-  const squares = []
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const inCorner = (x < 7 && y < 7) || (x >= size - 7 && y < 7) || (x < 7 && y >= size - 7)
-      if (!inCorner && (x * y + x * seed + y) % 3 === 0) squares.push(<rect key={x + '-' + y} x={x} y={y} width="1" height="1" />)
-    }
-  }
-  const corner = (x, y) => (
-    <g key={x + ':' + y}>
-      <rect x={x} y={y} width="7" height="7" />
-      <rect x={x + 1} y={y + 1} width="5" height="5" fill="#fff" />
-      <rect x={x + 2} y={y + 2} width="3" height="3" />
-    </g>
-  )
-  return (
-    <svg className="qr" viewBox={`-1 -1 ${size + 2} ${size + 2}`} role="img" aria-label={label}>
-      <rect x="-1" y="-1" width={size + 2} height={size + 2} fill="#fff" />
-      <g fill="#14241b">
-        {squares}
-        {corner(0, 0)}
-        {corner(size - 7, 0)}
-        {corner(0, size - 7)}
-      </g>
-    </svg>
-  )
 }

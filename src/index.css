@@ -301,7 +301,8 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 /* Added Nov 20: payment proof + province picker */
 .pay-to { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; align-items: center; margin: 14px 0 4px; }
 .pay-to .facts { margin: 0; }
-.qr { width: 132px; height: 132px; display: block; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; }
+.qr { width: 132px; height: 132px; display: block; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; object-fit: contain; }
+.qr-missing { display: grid; place-items: center; margin: 0; padding: 10px; text-align: center; font-size: 0.85rem; color: var(--ink-2); border-style: dashed; }
 .province { border: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .province legend { font-weight: 600; font-size: 0.95rem; padding: 0; margin-bottom: 6px; }
 @media (max-width: 420px) { .pay-to { grid-template-columns: minmax(0, 1fr); justify-items: center; } }

@@ -122,6 +122,20 @@ async function uploadIdPhotos(reference, idPhotos) {
   return failed
 }
 
+// ---------- Goat Cliff's GCash / Maya details ----------
+// The Super Admin sets these on the admin site (name, number, QR image, on/off).
+// Guests only get the ones that are on.
+export async function getWallets() {
+  const { data, error } = await supabase.from('payment_wallets')
+    .select('id, name, account_name, account_number, qr_path').order('id')
+  if (error) throw error
+  return data.map((w) => ({
+    ...w,
+    // the QR image's web address (the payment-qr storage is public), or null if none yet
+    qrUrl: w.qr_path ? supabase.storage.from('payment-qr').getPublicUrl(w.qr_path).data.publicUrl : null,
+  }))
+}
+
 // ---------- Payment proof ----------
 // The guest sends the reference number + a screenshot of their GCash / Maya receipt.
 // 1. upload the screenshot to the private payment-receipts storage (GC-XXXXXXXX/receipt-....jpg)
