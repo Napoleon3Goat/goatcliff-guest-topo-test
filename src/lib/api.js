@@ -87,22 +87,25 @@ export async function createBooking(b, idPhotos = []) {
     tents_for_2: b.tents_for_2,
     total_amount: b.total_amount,
     amount_due: b.amount_due,
+    discount_amount: b.discount_amount,
     // Fixed values: the database refuses anything else from a guest
     source: 'online',
     payment_status: 'pending',
     attendance_status: 'upcoming',
     amount_paid: 0,
     capacity_override: false,
-    // No hold_expires_at: hold expiry is Capstone 2. Without it the database keeps counting an unpaid
-    // booking toward the daily limit, the same way the calendar does, so a day can't be overbooked.
+    // No hold_expires_at: the database starts the 5-minute payment timer itself.
     consent_given_at: b.consent_given_at,
   }
   const { error } = await supabase.from('bookings').insert(row)
   if (error) throw error
+  // My own copy of when the 5 minutes end, just for the countdown on screen.
+  // (The database keeps the real timer and refuses proof that comes too late.)
+  const payBefore = Date.now() + 5 * 60 * 1000
   // ID photos for the discounts go to the private id-photos bucket, named after the booking
   // (GC-XXXXXXXX/senior-1.jpg). Only Super Admin and Staff Admin can open them.
   const failedPhotos = await uploadIdPhotos(row.reference_number, idPhotos)
-  return { ...row, failedPhotos }
+  return { ...row, failedPhotos, payBefore }
 }
 
 // idPhotos: [{ kind: 'senior' | 'pwd' | 'local', file }]. Returns how many could not be uploaded.
@@ -117,6 +120,27 @@ async function uploadIdPhotos(reference, idPhotos) {
     if (error) failed += 1
   }
   return failed
+}
+
+// ---------- Payment proof ----------
+// The guest sends the reference number + a screenshot of their GCash / Maya receipt.
+// 1. upload the screenshot to the private payment-receipts storage (GC-XXXXXXXX/receipt-....jpg)
+// 2. submit_payment saves it as a payment for staff to check, and stops the 5-minute timer
+export async function submitPayment(booking, { method, reference, receipt }) {
+  const ext = (receipt.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+  const path = `${booking.reference_number}/receipt-${Date.now()}.${ext}`
+  const upload = await supabase.storage.from('payment-receipts')
+    .upload(path, receipt, { contentType: receipt.type || 'image/jpeg' })
+  if (upload.error) throw new Error('RECEIPT_UPLOAD: ' + upload.error.message)
+
+  const { error } = await supabase.rpc('submit_payment', {
+    p_reference: booking.reference_number,
+    p_email: booking.email,
+    p_method: method,
+    p_transaction_reference: reference.trim(),
+    p_receipt_path: path,
+  })
+  if (error) throw error
 }
 
 // Check my booking: one booking, only when the reference AND the email match (lookup_booking).

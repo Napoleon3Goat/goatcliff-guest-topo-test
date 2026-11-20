@@ -7,7 +7,7 @@ import { friendlyError } from '../lib/errors'
 // with the GC- reference from the receipt plus the email they booked with.
 // lookup_booking() only returns a booking when BOTH match, and only these few fields.
 const PAYMENT = {
-  pending: 'Waiting for the down payment',
+  pending: 'Waiting for the down payment (or for Goat Cliff to check it)',
   down_payment: 'Down payment received',
   paid: 'Fully paid',
   expired: 'Not paid, booking released',

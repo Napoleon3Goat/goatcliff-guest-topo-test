@@ -11,13 +11,14 @@ import GuestForm, { EMPTY_FORM, AGE_GROUPS, validate } from '../components/Guest
 import PriceSummary from '../components/PriceSummary'
 import PaymentStep from '../components/PaymentStep'
 import Confirmation from '../components/Confirmation'
+import { provinceToSave } from '../components/ProvincePicker'
 
 const AGE_COLS = ['age_0_7', 'age_8_17', 'age_18_24', 'age_25_34', 'age_35_44', 'age_45_59', 'age_60_up']
 const STEPS = ['Date', 'Details', 'Review', 'Payment', 'Receipt']
 const MAX_NIGHTS = 14
 
 // The whole booking flow on one page, one step at a time:
-// 0 pick date → 1 guest details → 2 review & confirm → 3 pay (demo payment screen) → 4 confirmation
+// 0 pick date → 1 guest details → 2 review & confirm (holds the spot 5 minutes) → 3 pay + send proof → 4 receipt
 export default function Book() {
   const { code } = useParams()
   const { state } = useLocation() // set when coming from "Add a rock activity?" after camping
@@ -25,7 +26,7 @@ export default function Book() {
   const [loadError, setLoadError] = useState('')
 
   const [step, setStep] = useState(0)
-  const [payment, setPayment] = useState(null) // filled in when the (demo) payment goes through
+  const [payment, setPayment] = useState(null) // filled in when the guest sends their payment proof
   const [date, setDate] = useState(null)
   const [nights, setNights] = useState(1)
   const [availability, setAvailability] = useState(null)
@@ -82,7 +83,7 @@ export default function Book() {
         pwd_count: form.pwd,
         child_count: rock ? 0 : form.children,
         local_count: form.locals,
-        province: form.province.trim() || null,
+        province: provinceToSave(form.provinceChoice, form.provinceOther),
         found_us: form.foundUs || null,
         emergency_contact_name: rock ? form.emergencyName.trim() : null,
         emergency_contact_number: rock ? form.emergencyContact.replace(/[\s-]/g, '') : null,
@@ -94,6 +95,7 @@ export default function Book() {
         // Price preview from pricing.js (server-side pricing is planned for January)
         total_amount: price.total,
         amount_due: price.downPayment,
+        discount_amount: price.discount,
         consent_given_at: form.consentAt,
       }, Object.entries(form.idPhotos).flatMap(([kind, files]) => files.map((file) => ({ kind, file }))))
       setBooking(saved)
@@ -105,8 +107,10 @@ export default function Book() {
     }
   }
 
+  // After "time's up": keep the guest's details, pick the date again
   function startOver() {
     setBooking(null)
+    setPayment(null)
     setDate(null)
     setStep(0)
   }

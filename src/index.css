@@ -297,3 +297,11 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 .waiver p { margin: 0 0 8px; }
 .waiver ol { padding-left: 20px; display: grid; gap: 6px; margin: 0 0 8px; }
 .terms > h3 { margin: 14px 0 0; font-size: 1rem; }
+
+/* Added Nov 20: payment proof + province picker */
+.pay-to { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; align-items: center; margin: 14px 0 4px; }
+.pay-to .facts { margin: 0; }
+.qr { width: 132px; height: 132px; display: block; border: 1.5px solid var(--line); border-radius: 10px; background: #fff; }
+.province { border: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.province legend { font-weight: 600; font-size: 0.95rem; padding: 0; margin-bottom: 6px; }
+@media (max-width: 420px) { .pay-to { grid-template-columns: minmax(0, 1fr); justify-items: center; } }

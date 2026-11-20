@@ -1,5 +1,6 @@
 import Counter from './Counter'
 import Waiver from './Waiver'
+import ProvincePicker from './ProvincePicker'
 import { isCamping, isRock, discountedCount, TENTS } from '../lib/pricing'
 
 export const AGE_GROUPS = ['0–7', '8–17', '18–24', '25–34', '35–44', '45–59', '60+']
@@ -27,7 +28,8 @@ export const EMPTY_FORM = {
   idPhotos: { senior: [], pwd: [], local: [] }, // the chosen photo files, one per discounted person
   ages: Object.fromEntries(AGE_GROUPS.map((g) => [g, 0])),
   sexes: { male: 0, female: 0 },
-  province: '',
+  provinceChoice: '', // picked from the list (or "Others")
+  provinceOther: '', // typed when "Others" is picked
   foundUs: '',
   emergencyName: '', // rock only
   emergencyContact: '', // rock only
@@ -101,10 +103,12 @@ export default function GuestForm({ activity, form, setForm, errors }) {
         {errors.email && <span className="field-error">{errors.email}</span>}
       </label>
 
-      <label>
-        Province <span className="hint">(optional)</span>
-        <input value={form.province} onChange={setText('province')} autoComplete="address-level1" placeholder="e.g. Pangasinan" />
-      </label>
+      <ProvincePicker
+        choice={form.provinceChoice}
+        other={form.provinceOther}
+        onChoice={set('provinceChoice')}
+        onOther={set('provinceOther')}
+      />
 
       <label>
         How did you find Goat Cliff? <span className="hint">(optional)</span>

@@ -4,7 +4,7 @@ import { getActivities } from '../lib/api'
 import { addDays, formatDate, peso } from '../lib/dates'
 import { isCamping, isRock, TENTS } from '../lib/pricing'
 
-// The receipt shown after the down payment goes through.
+// The receipt shown after the guest sends their payment proof.
 export default function Confirmation({ booking, activity, form, payment }) {
   const camping = isCamping(activity)
   const [rock, setRock] = useState(null)
@@ -39,11 +39,11 @@ export default function Confirmation({ booking, activity, form, payment }) {
         )}
         <dt>Group</dt><dd>{booking.group_size} {booking.group_size > 1 ? 'people' : 'person'}{booking.viewing_count ? `, ${booking.viewing_count} viewing only` : ''}</dd>
         <dt>Total</dt><dd>{peso(booking.total_amount)}</dd>
-        <dt>Paid now</dt><dd>{peso(payment?.amount ?? booking.amount_due)}{payment ? ` via ${payment.method}` : ''}</dd>
+        <dt>Down payment</dt><dd>{peso(payment?.amount ?? booking.amount_due)}{payment ? ` via ${payment.method}` : ''}</dd>
         {payment && <><dt>Payment reference</dt><dd className="pay-ref">{payment.transaction}</dd></>}
-        {payment && <><dt>Paid on</dt><dd>{new Date(payment.paidAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</dd></>}
+        {payment && <><dt>Sent on</dt><dd>{new Date(payment.sentAt).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' })}</dd></>}
         <dt>Pay on arrival</dt><dd>{peso(booking.total_amount - (payment?.amount ?? booking.amount_due))}</dd>
-        <dt>Status</dt><dd><span className="status">Confirmed, down payment paid</span></dd>
+        <dt>Status</dt><dd><span className="status">Booked. Payment sent, Goat Cliff will check it.</span></dd>
       </dl>
 
       {camping && rock && (
