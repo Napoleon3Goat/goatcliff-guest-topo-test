@@ -16,6 +16,8 @@ const MESSAGES = [
   ['RECEIPT_UPLOAD', 'The screenshot didn\'t upload. Check your internet and try again (JPG, PNG or WebP, up to 5 MB).'],
   // Reschedule / cancel (guest_reschedule, guest_cancel)
   ['NOT_FOUND: the reference number, email and mobile', 'That mobile number doesn\'t match this booking. Use the number you booked with.'],
+  ['NO_REFUND_ACCOUNT', 'Choose GCash or Maya for your refund.'],
+  ['BAD_REFUND_ACCOUNT', 'Enter the 11-digit GCash or Maya number for your refund (09…).'],
   ['TOO_LATE', 'Your visit is less than 2 days away, so it can\'t be changed online. Please message us on Facebook.'],
   ['finish paying', 'Finish paying for this booking first.'],
   ['NOT_ACTIVE', 'This booking can\'t be changed online anymore. Please message us on Facebook.'],

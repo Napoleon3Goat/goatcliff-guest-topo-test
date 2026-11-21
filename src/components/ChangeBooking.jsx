@@ -20,8 +20,13 @@ export default function ChangeBooking({ booking, email, onChanged }) {
   const [newDate, setNewDate] = useState(null)
   const [availability, setAvailability] = useState(null)
   const [reason, setReason] = useState('')
+  const [refundMethod, setRefundMethod] = useState('gcash') // where to send the refund
+  const [refundAccount, setRefundAccount] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+
+  // Paid something (or sent proof that's still being checked)? Then ask where to send the refund.
+  const mayGetRefund = booking.amount_paid > 0 || booking.payment_status === 'pending'
 
   const today = todayManila()
   const year = booking.visit_date.slice(0, 4)
@@ -79,9 +84,13 @@ export default function ChangeBooking({ booking, email, onChanged }) {
     e.preventDefault()
     const problem = checkTyped()
     if (problem) return setError(problem)
+    if (mayGetRefund && !/^09\d{9}$/.test(refundAccount.replace(/[^0-9]/g, ''))) {
+      return setError('Enter the 11-digit GCash or Maya number for your refund (09…).')
+    }
     setBusy(true); setError('')
     try {
-      const refund = await cancelBooking(booking.reference_number, email, mobile, reason)
+      const refund = await cancelBooking(booking.reference_number, email, mobile, reason,
+        mayGetRefund ? refundMethod : null, mayGetRefund ? refundAccount : null)
       onChanged(refund > 0
         ? `Your booking is cancelled. Goat Cliff will contact you to arrange your refund of ${peso(refund)}. Refunds usually take 2–5 business days.`
         : 'Your booking is cancelled.')
@@ -150,6 +159,23 @@ export default function ChangeBooking({ booking, email, onChanged }) {
             Reason <span className="hint">(optional)</span>
             <textarea value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} rows={3} />
           </label>
+          {mayGetRefund && (
+            <fieldset className="refund-to">
+              <legend>Where should we send your refund?</legend>
+              <div className="refund-wallets">
+                <label className="radio-line">
+                  <input type="radio" name="refund-method" value="gcash" checked={refundMethod === 'gcash'} onChange={() => setRefundMethod('gcash')} /> GCash
+                </label>
+                <label className="radio-line">
+                  <input type="radio" name="refund-method" value="maya" checked={refundMethod === 'maya'} onChange={() => setRefundMethod('maya')} /> Maya
+                </label>
+              </div>
+              <label>
+                Your {refundMethod === 'gcash' ? 'GCash' : 'Maya'} number
+                <input value={refundAccount} onChange={(e) => setRefundAccount(e.target.value)} inputMode="tel" placeholder="09XX XXX XXXX" />
+              </label>
+            </fieldset>
+          )}
           {confirmBoxes}
           {error && <span className="field-error" role="alert">{error}</span>}
           <div className="actions">

@@ -322,3 +322,8 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 .change-booking .actions { margin-top: 4px; flex-wrap: wrap; }
 .btn-danger { background: var(--white); color: #a83a0e; border: 1.5px solid #a83a0e; }
 .btn-danger:hover { background: #fbe9df; }
+.refund-to { border: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.refund-to legend { font-weight: 600; padding: 0; margin-bottom: 8px; }
+.refund-wallets { display: flex; gap: 20px; }
+.radio-line { flex-direction: row; align-items: center; gap: 8px; font-weight: 600; }
+.radio-line input { width: 20px; height: 20px; min-height: 0; margin: 0; accent-color: var(--rope); }

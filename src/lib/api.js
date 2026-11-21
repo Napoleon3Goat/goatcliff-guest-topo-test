@@ -174,10 +174,12 @@ export async function rescheduleBooking(reference, email, mobile, newDate) {
   if (error) throw error
 }
 
-// Gives back the refund amount (0 = nothing was paid)
-export async function cancelBooking(reference, email, mobile, reason) {
+// Gives back the refund amount (0 = nothing was paid).
+// refundMethod / refundAccount = where to send the refund (GCash or Maya + number).
+export async function cancelBooking(reference, email, mobile, reason, refundMethod, refundAccount) {
   const { data, error } = await supabase.rpc('guest_cancel', {
     p_reference: reference, p_email: email.trim(), p_mobile: mobile, p_reason: reason,
+    p_refund_method: refundMethod || null, p_refund_account: refundAccount || null,
   })
   if (error) throw error
   return Number(data)
