@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { lookupBooking } from '../lib/api'
 import { formatDate, addDays, peso } from '../lib/dates'
 import { friendlyError } from '../lib/errors'
+import ChangeBooking from './ChangeBooking'
 
-// "Check my booking": there are no guest logins yet (January), so a guest finds their booking
-// with the GC- reference from the receipt plus the email they booked with.
-// lookup_booking() only returns a booking when BOTH match, and only these few fields.
+// "Check my booking": a guest finds their booking with the GC- reference from the receipt
+// plus the email they booked with. lookup_booking() only returns a booking when BOTH match,
+// and only these few fields. From here they can also reschedule or cancel (ChangeBooking),
+// which needs their mobile number too.
 const PAYMENT = {
   pending: 'Waiting for the down payment (or for Goat Cliff to check it)',
   down_payment: 'Down payment received',
@@ -26,10 +28,11 @@ export default function CheckBooking() {
   const [result, setResult] = useState(null) // the booking, or 'none' when nothing matched
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [notice, setNotice] = useState('') // the message after a reschedule or cancel
 
   async function find(e) {
     e.preventDefault()
-    setError(''); setResult(null)
+    setError(''); setResult(null); setNotice('')
     if (!/^GC-?\w{8}$/i.test(reference.trim())) return setError('Enter the reference from your receipt, like GC-AB12CD34.')
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError('Enter the email you booked with.')
     setBusy(true)
@@ -37,6 +40,17 @@ export default function CheckBooking() {
       const ref = reference.trim().toUpperCase().replace(/^GC-?/, 'GC-')
       setResult((await lookupBooking(ref, email)) || 'none')
     } catch (err) { setError(friendlyError(err)) } finally { setBusy(false) }
+  }
+
+  // After a change: show the message and the booking's new details
+  async function refresh(message) {
+    setNotice(message)
+    try {
+      const fresh = await lookupBooking(result.reference_number, email)
+      if (fresh) setResult(fresh)
+    } catch {
+      // the change itself worked; the old details just stay on screen
+    }
   }
 
   const b = result && result !== 'none' ? result : null
@@ -70,6 +84,15 @@ export default function CheckBooking() {
           <dt>Visit</dt><dd>{VISIT[b.attendance_status] || b.attendance_status}</dd>
         </dl>
       )}
+      {notice && <p className="note" role="status">{notice}</p>}
+      {b && canChange(b) && (
+        <ChangeBooking key={b.reference_number + b.visit_date} booking={b} email={email} onChanged={refresh} />
+      )}
     </div>
   )
+}
+
+// Only upcoming bookings that are booked (not expired or refunded) can be changed online
+function canChange(b) {
+  return b.attendance_status === 'upcoming' && ['pending', 'down_payment', 'paid'].includes(b.payment_status)
 }

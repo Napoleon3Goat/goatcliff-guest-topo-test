@@ -315,3 +315,10 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 .province-list button:hover, .province-list button:focus-visible { background: #fbe9df; }
 .province-list button[aria-selected="true"] { font-weight: 700; }
 @media (max-width: 420px) { .pay-to { grid-template-columns: minmax(0, 1fr); justify-items: center; } }
+
+/* Added Nov 21: reschedule / cancel under "Check my booking" */
+.change-booking { margin-top: 20px; padding-top: 16px; border-top: 1.5px solid var(--line); display: grid; gap: 12px; }
+.change-booking h3, .change-booking h4 { margin: 0; }
+.change-booking .actions { margin-top: 4px; flex-wrap: wrap; }
+.btn-danger { background: var(--white); color: #a83a0e; border: 1.5px solid #a83a0e; }
+.btn-danger:hover { background: #fbe9df; }

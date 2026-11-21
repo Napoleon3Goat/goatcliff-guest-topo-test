@@ -56,7 +56,8 @@ const LEGENDS = {
 
 // Month calendar. `selected` = chosen date; `range` = extra highlighted dates (camping nights).
 // minDate/maxDate optionally limit which dates can be picked.
-export default function Calendar({ activity, selected, onSelect, range = [], minDate, maxDate, onAvailability }) {
+// `mine` = the nights of the booking being rescheduled: shown as free, since it's the guest's own spot.
+export default function Calendar({ activity, selected, onSelect, range = [], minDate, maxDate, onAvailability, mine = [] }) {
   // Open on the first date that can be booked, so late in the month the guest doesn't land on an all-grey month
   const earliest = addDays(todayManila(), activity.advance_notice_days ?? 2)
   const start = selected || (minDate && minDate > earliest ? minDate : earliest)
@@ -78,8 +79,9 @@ export default function Calendar({ activity, selected, onSelect, range = [], min
     getAvailability(activity, first, addDays(last, 31))
       .then((data) => {
         if (cancelled) return
-        setAvailability(data)
-        onAvailability?.(data)
+        const shown = { ...data, taken: data.taken.filter((d) => !mine.includes(d)) }
+        setAvailability(shown)
+        onAvailability?.(shown)
       })
       .catch((e) => !cancelled && setError(friendlyError(e)))
     return () => { cancelled = true }

@@ -164,3 +164,21 @@ export async function lookupBooking(reference, email) {
   if (error) throw error
   return data?.[0] || null
 }
+
+// Reschedule or cancel from "Check my booking". The database checks that the reference,
+// email AND mobile number all match, and the rules (2 days before, new date by Dec 31).
+export async function rescheduleBooking(reference, email, mobile, newDate) {
+  const { error } = await supabase.rpc('guest_reschedule', {
+    p_reference: reference, p_email: email.trim(), p_mobile: mobile, p_new_date: newDate,
+  })
+  if (error) throw error
+}
+
+// Gives back the refund amount (0 = nothing was paid)
+export async function cancelBooking(reference, email, mobile, reason) {
+  const { data, error } = await supabase.rpc('guest_cancel', {
+    p_reference: reference, p_email: email.trim(), p_mobile: mobile, p_reason: reason,
+  })
+  if (error) throw error
+  return Number(data)
+}
