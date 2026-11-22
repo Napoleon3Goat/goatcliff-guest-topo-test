@@ -247,7 +247,6 @@ input:focus, textarea:focus, select:focus { outline: 2.5px solid var(--rope); ou
 }
 .small-ref { font-size: 1.5rem; margin-top: 4px; }
 .note { background: var(--white); border: 1px solid var(--line); padding: 12px; border-radius: 10px; text-align: left; font-size: 0.93rem; }
-.offer { border: 1.5px dashed var(--rope); border-radius: var(--radius); padding: 16px; margin: 16px 0; background: var(--white); }
 
 
 /* ---------- Payment method choice (GCash / Maya) ---------- */

@@ -1,23 +1,10 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getActivities } from '../lib/api'
 import { addDays, formatDate, peso } from '../lib/dates'
-import { isCamping, isRock, TENTS } from '../lib/pricing'
+import { isCamping, TENTS } from '../lib/pricing'
 
 // The receipt shown after the guest sends their payment proof.
 export default function Confirmation({ booking, activity, form, payment }) {
   const camping = isCamping(activity)
-  const [rock, setRock] = useState(null)
-
-  // After a camping booking, offer the rock package (a separate booking).
-  useEffect(() => {
-    if (!camping) return
-    getActivities()
-      .then((list) => setRock(list.find(isRock) || null))
-      .catch(() => setRock(null)) // the offer is optional; hide it if loading fails
-  }, [camping])
-
-  // Any day of the stay, check-out day included, can be picked for the rock activity.
   const checkout = camping ? addDays(booking.visit_date, booking.nights) : null
 
   return (
@@ -45,19 +32,6 @@ export default function Confirmation({ booking, activity, form, payment }) {
         <dt>Pay on arrival</dt><dd>{peso(booking.total_amount - (payment?.amount ?? booking.amount_due))}</dd>
         <dt>Status</dt><dd><span className="status">Booked. Payment sent, Goat Cliff will check it.</span></dd>
       </dl>
-
-      {camping && rock && (
-        <div className="offer">
-          <h3>Add a rock activity?</h3>
-          <Link
-            to={`/book/${rock.code}`}
-            className="btn-primary"
-            state={{ prefill: form, minDate: booking.visit_date, maxDate: checkout }}
-          >
-            Add the Rock Activities Package
-          </Link>
-        </div>
-      )}
 
       <p className="muted">Keep this reference. To check your booking later, go to Help and enter it with your email.</p>
       <Link to="/help" className="btn-secondary">Check my booking or contact Goat Cliff</Link>

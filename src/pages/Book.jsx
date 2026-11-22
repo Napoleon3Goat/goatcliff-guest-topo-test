@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { getActivity, createBooking } from '../lib/api'
 import { isCamping, isRock, previewPrice, TENTS } from '../lib/pricing'
 import { addDays, formatDate } from '../lib/dates'
@@ -21,7 +21,6 @@ const MAX_NIGHTS = 14
 // 0 pick date → 1 guest details → 2 review & confirm (holds the spot 5 minutes) → 3 pay + send proof → 4 receipt
 export default function Book() {
   const { code } = useParams()
-  const { state } = useLocation() // set when coming from "Add a rock activity?" after camping
   const [activity, setActivity] = useState(undefined)
   const [loadError, setLoadError] = useState('')
 
@@ -30,10 +29,7 @@ export default function Book() {
   const [date, setDate] = useState(null)
   const [nights, setNights] = useState(1)
   const [availability, setAvailability] = useState(null)
-  const [form, setForm] = useState(() => ({
-    ...EMPTY_FORM,
-    ...(state?.prefill ? { ...state.prefill, viewers: 0, ageConfirmed: false, children: 0, consent: false, consentAt: null } : {}),
-  }))
+  const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [booking, setBooking] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -133,8 +129,6 @@ export default function Book() {
             activity={activity}
             selected={date}
             range={stayNights}
-            minDate={state?.minDate}
-            maxDate={state?.maxDate}
             onSelect={(d, avail) => { setDate(d); setAvailability(avail) }}
             onAvailability={setAvailability}
           />
